@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "platformio.platformio-ide",
+    "marus25.cortex-debug",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "ms-vscode.cpptools-extension-pack"
+  ]
+}
