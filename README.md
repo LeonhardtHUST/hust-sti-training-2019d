@@ -2,6 +2,15 @@
 
 面向 STM32CubeMX + PlatformIO + VS Code 的最小 STM32G474VET6 起步模板。
 
+## 本仓库用途
+
+本仓库是**软件四 / 软件五**（STM32G474 课程设计）的开发工作区，直接沿用上述最小模板的
+架构与工具链。当前只有文档和模块接口骨架：外设配置、信号处理算法、硬件驱动均未实现。
+
+- [软件四：双通道正弦参数测量](docs/software4.md)
+- [软件五：AD9959 扫频与电路特性测试](docs/software5.md)
+- [架构说明](docs/architecture.md)
+
 ## 目标平台
 
 - 芯片：STM32G474VET6（LQFP100 封装，512 KB Flash，128 KB RAM）
