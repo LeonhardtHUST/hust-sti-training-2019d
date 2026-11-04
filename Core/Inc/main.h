@@ -30,7 +30,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+/* 板级引脚映射（XPulse 专用）。本文件不会被 CubeMX 生成/覆盖，
+ * 放在 USER CODE 块里引入，重新生成代码后这行依然保留。 */
+#include "xpulse.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

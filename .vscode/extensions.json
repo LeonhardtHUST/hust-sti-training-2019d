@@ -4,7 +4,7 @@
     "recommendations": [
         "llvm-vs-code-extensions.vscode-clangd",
         "marus25.cortex-debug",
-        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cpptools",
         "platformio.platformio-ide"
     ],
     "unwantedRecommendations": [

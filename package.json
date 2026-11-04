@@ -1,0 +1,15 @@
+
+{
+  "name": "hust-sti-training-2019d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "2019D 简易电路特性测试仪（软件四 / 软件五）STM32G474VET6 / XPulse 工作区",
+  "scripts": {
+    "hooks:install": "vp hooks enable",
+    "hooks:uninstall": "vp hooks disable"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4"
+  }
+}
