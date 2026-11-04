@@ -97,8 +97,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-    HAL_Delay(500);
+    /* KEY1（PB8/BOOT0）按下为高电平；三色灯共阳，写 RESET 才点亮。 */
+    if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET) {
+      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
+    } else {
+      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_SET);
+    }
   }
   /* USER CODE END 3 */
 }
@@ -161,19 +165,26 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, LED_B_Pin|LED_G_Pin|LED_R_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : LED_RED_Pin */
-  GPIO_InitStruct.Pin = LED_RED_Pin;
+  /*Configure GPIO pins : LED_B_Pin LED_G_Pin LED_R_Pin */
+  GPIO_InitStruct.Pin = LED_B_Pin|LED_G_Pin|LED_R_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_RED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : KEY1_Pin */
+  GPIO_InitStruct.Pin = KEY1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(KEY1_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

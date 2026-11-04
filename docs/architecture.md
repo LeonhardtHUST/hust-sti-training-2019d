@@ -70,7 +70,7 @@ HAL_Init → SystemClock_Config → GPIO（CubeMX 生成）
         轮询 key 事件 → 分发（单次采集 / 扫频）
         → measurement_poll()（Software V）
         → UI 刷新节流
-        → PC13 心跳
+        → 板载红灯（PC2）心跳
 ```
 
 ## 尚未确定（`TBD`）
