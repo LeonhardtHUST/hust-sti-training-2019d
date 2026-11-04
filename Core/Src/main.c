@@ -97,11 +97,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    /* KEY1（PB8/BOOT0）按下为高电平；三色灯共阳，写 RESET 才点亮。 */
-    if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_SET) {
-      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
+    /* KEY1（PB8/BOOT0）按下为高电平；三色灯共阳，写 RESET 才点亮。
+     * 引脚语义统一走 xpulse.h 的 XPULSE_* 宏，不依赖 CubeMX 生成的 LED_* / KEY1_* 宏。 */
+    if (HAL_GPIO_ReadPin(XPULSE_KEY_BOOT_GPIO_Port, XPULSE_KEY_BOOT_Pin) == XPULSE_KEY_BOOT_ACTIVE) {
+      XPULSE_LED_R_ON();
     } else {
-      HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_SET);
+      XPULSE_LED_R_OFF();
     }
   }
   /* USER CODE END 3 */
