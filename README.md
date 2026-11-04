@@ -49,13 +49,14 @@ pio run -t upload
 - 用户按键 KEY1：PB8（即 BOOT0 脚，按下为高电平）；KEY2：硬件复位键（拉 NRST）
 - 调试口 SWD：PA13 = SWDIO、PA14 = SWCLK（P1 排针 4 / 2 脚）
 - 串口：PA9 = USART1_TX、PA10 = USART1_RX（P1 排针 1 / 3 脚，115200 8N1）
-- 默认时钟：HSI 16 MHz（未启用 PLL）；板上还有 8 MHz HSE（PF0/PF1）与
-  32.768 kHz LSE（PC14/PC15），需要时在 CubeMX 的 RCC 里启用
+- 时钟：8 MHz HSE（PF0/PF1）+ PLL（M=2、N=85、R=2）→ **170 MHz** SYSCLK；
+  另有 32.768 kHz LSE（PC14/PC15），需要时在 CubeMX 的 RCC 里启用
 
 > 本仓库的 `.ioc` 已把 PC0 / PC1 / PC2 配成 `GPIO_Output`（`LED_B` / `LED_G` / `LED_R`，
 > 初始电平为高即熄灭），PB8 配成 `GPIO_Input`（`KEY1`，内部下拉）；示例 `main()` 用
 > KEY1 的电平驱动红灯。`main.h` 里由 `.ioc` 生成的 `KEY1_*` / `LED_*` 宏和 `xpulse.h`
-> 的 `XP_KEY_BOOT_*` / `XP_LED_*` 指向同一批引脚，任选一套使用即可。
+> 的 `XPULSE_KEY_BOOT_*` / `XPULSE_LED_*` 指向同一批引脚，**业务代码统一用后者**
+> （语义明确，且在 CubeMX 里改 GPIO_Label 也不会撞名）。
 
 ## 板级引脚映射（`Core/Inc/xpulse.h`）
 
@@ -63,8 +64,8 @@ pio run -t upload
 `GPIO_PIN_x` / `GPIOx` 魔法数字。它是普通头文件，CubeMX **既不生成也不覆盖**；而对它的
 `#include` 放在 `main.h` 的 `/* USER CODE BEGIN Includes */` 里，重新生成后依然保留。
 
-命名沿用 CubeMX 的 `<NAME>_Pin` / `<NAME>_GPIO_Port` 形式，但加 `XP_` 前缀，避免以后在
-CubeMX 里给同一引脚另起 `GPIO_Label` 时撞名。常用外设：
+命名沿用 CubeMX 的 `<NAME>_Pin` / `<NAME>_GPIO_Port` 形式，但统一加 `XPULSE_` 前缀，避免以后在
+CubeMX 里给同一引脚另起 `GPIO_Label`（如 `.ioc` 里的 `LED_R`）时撞名。常用外设：
 
 | 功能 | 网络名 | 引脚 | 说明 |
 | --- | --- | --- | --- |
@@ -87,13 +88,13 @@ CubeMX 里给同一引脚另起 `GPIO_Label` 时撞名。常用外设：
 ```c
 #include "main.h"   /* 已经间接包含 xpulse.h */
 
-XP_LED_ALL_OFF();          /* 先把三色灯全灭 */
-XP_LED_R_ON();             /* 点亮红灯（PC2） */
-HAL_GPIO_TogglePin(XP_LED_G_GPIO_Port, XP_LED_G_Pin);
+XPULSE_LED_ALL_OFF();      /* 先把三色灯全灭 */
+XPULSE_LED_R_ON();         /* 点亮红灯（PC2） */
+HAL_GPIO_TogglePin(XPULSE_LED_G_GPIO_Port, XPULSE_LED_G_Pin);
 ```
 
 > `xpulse.h` 只负责"引脚在哪"，引脚模式/AF/上下拉仍由 `.ioc` 决定：例如要用 SPI2，
-> 先在 CubeMX 里把 PB13/PB14/PB15 配成 SPI2，再到代码里引用 `XP_EXT_SPI2_*`。
+> 先在 CubeMX 里把 PB13/PB14/PB15 配成 SPI2，再到代码里引用 `XPULSE_EXT_SPI2_*`。
 
 ## 提交规范（commitlint）
 
@@ -341,3 +342,57 @@ pio run -t compiledb
 ```
 
 `compile_commands.json` 和 `.clangd` 都是生成物，已在 `.gitignore` 中忽略，不必提交。
+
+## 故障排查
+
+- **`pio` 命令不存在**：安装 PlatformIO IDE 扩展后重启 VS Code，或 `pip install platformio`。
+  用 `pio --version` 核对；Windows 集成终端的 PATH 可能先匹配到旧的 pio shim。
+- **找不到下载器 / 探针连不上**：默认走 ST-Link（`upload_protocol = stlink`、
+  `debug_tool = stlink`），底层是 PlatformIO 自带的 OpenOCD + `interface/stlink.cfg`。
+  换 CMSIS-DAP 时两项一起改成 `cmsis-dap`；仓库刻意不入库 `launch.json`
+  （已在 `.gitignore` 忽略），需要 Cortex-Debug 的 launch / attach 配置时按
+  [Cortex-Debug 调试示例](docs/DEBUG-CORTEX.md) 自建，并复用
+  `scripts/openocd-stlink.cfg` / `scripts/openocd-cmsis-dap.cfg` 两份探针配置。
+- **SWD 连接失败（`cannot read IDR` / `No ACK`）**：先查 SWDIO(PA13) / SWCLK(PA14)
+  是否接反、GND 是否共地、目标板是否独立供电；必要时降低 `debug_speed`
+  或改用「连接时复位」（`connect_assert_srst`）。
+- **重复定义符号**：检查是否把 `Drivers/` 加进编译，或删掉了 `platformio.ini` 里
+  `build_src_filter = +<*> -<system_stm32g4xx.c>` 的排除规则。
+- **链接脚本不对 / Flash 溢出**：确认 `boards/genericSTM32G474VE.json` 的 `mcu`
+  是 `stm32g474vet6`，`maximum_size` / `maximum_ram_size` 为 524288 / 131072。
+- **生成后外设没生效**：CubeMX 对 `.ioc` 的错误是**非致命**的，信号名写错只会留一行
+  `Cannot map signal` 然后静默丢弃外设。核验生成日志无 `Cannot map`、
+  `main.c` 有对应 `MX_xxx_Init()`，且手写参数已进 `IPParameters` / `GPIOParameters`
+  白名单。见 [CubeMX 工具实测](docs/TOOLING-cubemx.md)。
+- **CubeMX 无头生成卡住**：多半是 `.ioc` 的 `ProjectManager.AskForMigrate=true`
+  弹了模态迁移框；本仓 `.ioc` 已设为 `false`，若被 CubeMX 生成 / 保存写回 `true`，
+  再改回 `false` 即可。见 [占位符清单](docs/PLACEHOLDERS.md) D7。
+- **clangd 大面积报红**：`compile_commands.json` 过期或缺失，重跑 `pio run -t compiledb`；
+  改过 `platformio.ini`、`build_flags`、board 或源文件集合后都要重跑。
+- **提交被拒绝**：提交信息不符合 Conventional Commits 格式，按上面的「提交规范」改写；
+  也可用 `pnpm exec commitlint --edit .git/COMMIT_EDITMSG` 复查。
+
+## 工程规约与验证
+
+规约地基见 [工程规约](AGENTS.md)（12 条硬约束、L0–L5 验证关卡、与 commitlint 的分工），
+复制模板后必查项见 [占位符清单](docs/PLACEHOLDERS.md)，工具实测结论见
+[CubeMX 工具实测](docs/TOOLING-cubemx.md)，调试配置见
+[Cortex-Debug 调试示例](docs/DEBUG-CORTEX.md)，模块边界见 [架构说明](docs/architecture.md)。
+
+- **版本锁定**：`ststm32@20.0.0`、`framework-stm32cubeg4@1.6.3`、
+  `toolchain-gccarmnoneeabi@1.70201.0`、`tool-ldscripts-ststm32@0.3.0`、
+  `tool-openocd@3.1200.7`。CubeG4 1.6.3 与本机 CubeMX 的 FW_G4 V1.6.3 同版本；
+  升级须同步验证「生成代码 + 构建」，不要单独升 HAL。
+- **编译选项**：工程源码用 C11 + `-Wall -Wextra -Werror`（`build_src_flags`），
+  严格选项不施加于 HAL/CMSIS；`-Werror` 一旦开启，新增告警会直接让构建失败。
+- **链接期可见性**（`build_flags`）：`-fdata-sections` / `-ffunction-sections`
+  配合 `-Wl,--gc-sections` 去掉未用段；`-Wl,--print-memory-usage` 让每次链接
+  直接打印 Flash / RAM 占用；`-Wl,-Map=${BUILD_DIR}/firmware.map` 产出
+  `.pio/build/genericSTM32G474VE/firmware.map`，便于查段与符号布局。
+- **浮点 printf**：newlib-nano 默认不含 `%f`，需要时在 `platformio.ini` 加
+  `-Wl,-u,_printf_float` 并重新构建（会增加 Flash/RAM 占用）。
+- **验证关卡**：L0 未验证 / L1 静态 / L2 主机回归（主机 GCC 编译不依赖 HAL 的纯 C，
+  不需要开发板）/ L3 `pio run` / L4 CubeMX 生成核验（任何 `.ioc` 改动必做）/
+  L5 实板。提交信息里如实写明做到的等级，纯文档改动明确写「未运行构建」。
+- **构建通过不等于能用**：影响运行时行为的改动必须实板确认，结论里区分
+  「编译通过」与「实板验证过」，不要复用旧构建数字充当本次证据。
