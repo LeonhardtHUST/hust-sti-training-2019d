@@ -58,14 +58,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define KEY1_Pin        GPIO_PIN_8
-#define KEY1_GPIO_Port  GPIOB
-#define LED_B_Pin       GPIO_PIN_0
+#define LED_B_Pin GPIO_PIN_0
 #define LED_B_GPIO_Port GPIOC
-#define LED_G_Pin       GPIO_PIN_1
+#define LED_G_Pin GPIO_PIN_1
 #define LED_G_GPIO_Port GPIOC
-#define LED_R_Pin       GPIO_PIN_2
+#define LED_R_Pin GPIO_PIN_2
 #define LED_R_GPIO_Port GPIOC
+#define KEY1_Pin GPIO_PIN_8
+#define KEY1_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 /* 逻辑电平别名。写在 USER CODE 块内，重新生成时才不会被 CubeMX 抹掉。 */
