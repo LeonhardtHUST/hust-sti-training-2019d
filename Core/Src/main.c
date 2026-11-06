@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "acquisition.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,6 +98,7 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim6);
+  acq_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,11 +110,14 @@ int main(void)
     /* USER CODE BEGIN 3 */
     /* KEY1（PB8/BOOT0）按下为高电平；三色灯共阳，写 RESET 才点亮。
      * 引脚语义统一走 xpulse.h 的 XPULSE_* 宏，不依赖 CubeMX 生成的 LED_* / KEY1_* 宏。 */
-    /*if (HAL_GPIO_ReadPin(XPULSE_KEY_BOOT_GPIO_Port, XPULSE_KEY_BOOT_Pin) == XPULSE_KEY_BOOT_ACTIVE) {
-      XPULSE_LED_R_ON();
-    } else {
-      XPULSE_LED_R_OFF();
-    }*/
+    if (HAL_GPIO_ReadPin(XPULSE_KEY_BOOT_GPIO_Port, XPULSE_KEY_BOOT_Pin) == GPIO_HIGH) {
+      acq_start();
+    }
+    if (acq_is_done()) {
+      acq_frame_t frame;
+      acq_get_frame(&frame);
+      /* TODO(软件四): 处理采集到的帧数据 */
+    }
   }
   /* USER CODE END 3 */
 }
