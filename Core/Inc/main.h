@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -24,12 +25,53 @@
 extern "C" {
 #endif
 
+/* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
 
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+/* 板级引脚映射（XPulse 专用）。本文件不会被 CubeMX 生成/覆盖，
+ * 放在 USER CODE 块里引入，重新生成代码后这行依然保留。 */
+#include "xpulse.h"
+/* USER CODE END Includes */
+
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
+
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+/* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
-#define LED_RED_Pin GPIO_PIN_13
-#define LED_RED_GPIO_Port GPIOC
+/* USER CODE BEGIN EFP */
+
+/* USER CODE END EFP */
+
+/* Private defines -----------------------------------------------------------*/
+#define LED_B_Pin GPIO_PIN_0
+#define LED_B_GPIO_Port GPIOC
+#define LED_G_Pin GPIO_PIN_1
+#define LED_G_GPIO_Port GPIOC
+#define LED_R_Pin GPIO_PIN_2
+#define LED_R_GPIO_Port GPIOC
+#define KEY1_Pin GPIO_PIN_8
+#define KEY1_GPIO_Port GPIOB
+
+/* USER CODE BEGIN Private defines */
+/* 逻辑电平别名。写在 USER CODE 块内，重新生成时才不会被 CubeMX 抹掉。 */
+#define GPIO_LOW        GPIO_PIN_RESET
+#define GPIO_HIGH       GPIO_PIN_SET
+/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
