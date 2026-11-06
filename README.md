@@ -243,6 +243,7 @@ git rm -r .vite-hooks commitlint.config.mjs
 ├── .clangd
 ├── platformio.ini
 ├── Core/
+├── app/
 ├── Drivers/
 └── ...
 ```

@@ -8,9 +8,9 @@
   `build_src_flags` 的 `-std=c11 -Wall -Wextra -Werror`。
 - `inc/`：放对应头文件，已通过 `-Iapp/inc` 加入全局 include 路径。
 
-**既有模块暂不迁移**：`Core/Src/*.c` 下的 9 个业务模块（`acquisition`、
-`signal_analysis`、`dds`、`ui`、`key`、`measurement`、`uart_stream` 等）仍在原位，
-模块边界见 [架构说明](../docs/architecture.md)。新写的代码放这里，不要继续往
+**既有模块暂不迁移**：`Core/Src/*.c` 下的 8 个业务模块（`acquisition`、
+`signal_analysis`、`signal_math`、`dds`、`ui`、`key`、`measurement`、
+`uart_stream`）仍在原位，模块边界见 [架构说明](../docs/architecture.md)。新写的代码放这里，不要继续往
 CubeMX 生成文件里加逻辑；在 `Core/` 的 USER CODE 块内写本来是安全的
 （`KeepUserCode=true`），只是要反复在生成物里找位置、长期维护成本更高。
 
