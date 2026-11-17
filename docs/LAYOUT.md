@@ -3,6 +3,7 @@
 > 本文说明「新代码该写在哪里」以及 `platformio.ini` 为什么这样配。
 > 模块边界与依赖方向另见 [架构说明](architecture.md)，工程硬约束见
 > [工程规约](../AGENTS.md)，CubeMX 生成坑见 [工具实测](TOOLING-cubemx.md)。
+> 可复用组件的封装范式见 [库封装范式](LIB-PATTERN.md)，它与 `app/` 的编译模型不同。
 
 ## 1. 谁拥有哪些目录
 
@@ -12,7 +13,7 @@
 | `Core/` | CubeMX + 人 | 生成物（`main.c`、`*_it.c`、`*_msp.c` 等）+ 既有 8 个业务模块 | `Core/Src/*.c` 全编 |
 | `Core/Inc/xpulse.h` | 人 | 板级「信号 → 引脚」映射 | 头文件，CubeMX 不生成 |
 | `app/` | 人 | **新写的业务代码** | `app/src/**` 全编，继承 `-Werror` |
-| `lib/<name>/` | 人 | 可复用 / 第三方组件 | 仅被 `#include` 链拉入时编译 |
+| `lib/<name>/` | 人 | 可复用 / 第三方组件（`library.json` 自述，见 [库封装范式](LIB-PATTERN.md)） | 仅被 `#include` 链拉入时编译；要强制全量编译用 `lib_deps` |
 | `boards/` `docs/` `scripts/` | 人 | 板卡定义、文档、脚本 | 不参与 |
 
 **本次只建立 `app/` 落点，没有迁移既有模块。** 8 个模块（`acquisition`、
@@ -78,7 +79,7 @@ G474 是 Cortex-M4F（单精度 FPv4-SP）。`build_flags` 里的
 - 新增 `app/` 源文件后跑一次 `pio run`（L3）；影响运行时行为的改动按
   [工程规约](../AGENTS.md) §3 还需 **L5 实板确认**，构建通过不等于能用。
 - 若改用 `lib/<name>/` 存放组件，记得配 `library.json` 的 `build.flags`，
-  未被引用的库不会自动编译。
+  未被引用的库不会自动编译；字段与流程见 [库封装范式](LIB-PATTERN.md)。
 
 ## 6. 本仓同步记录（2026-11-06）
 
