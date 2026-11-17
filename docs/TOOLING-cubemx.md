@@ -69,8 +69,9 @@ exit
   会指向不存在的文件（改名清单见 [占位符](PLACEHOLDERS.md) §A）。
 - 不提供 `cubemx-init.mx`：那是「从裸 MCU 建工程」用的，含 `__PROJECT_DIR__` 绝对路径
   占位符，本仓已有完整 `.ioc`，不需要重建。
-- 生成前确认 `.ioc` 的 `ProjectManager.AskForMigrate=false`（§3.4、[占位符](PLACEHOLDERS.md)
-  D7），生成后 CubeMX 会写回 `true`，下次无头生成前记得改回 `false`。
+- 无头生成前把 `.ioc` 的 `ProjectManager.AskForMigrate` 置为 `false`（**本仓当前实际是
+  `true`**，见 §3.4、[占位符](PLACEHOLDERS.md) D7）；生成后 CubeMX 会写回 `true`，
+  下次无头生成前再改回 `false`。
 - `.mx` 脚本里的路径若含空格，`config load` 的参数必须加双引号（§3.8）。
 
 ---
@@ -100,22 +101,24 @@ JVM 启动与 CMSIS 拷贝上，本机约 **1 分钟量级**，超时阈值不�
 
 ### 3.4 `AskForMigrate` 会被写回 `true`
 
-模板里若提交为 `ProjectManager.AskForMigrate=false`，CubeMX 每次生成 / 保存都会改回
-`true`。本仓 `.ioc` 已设为 `false`（D1 修复时一并改，便于无头生成）；被写回 `true`
-时再改回 `false`。无头模式如果卡在 `Begin LoadConfig()` 后不再输出，先把它改成
-`false` 再跑（这是模态迁移框在等人点）。详见 [占位符](PLACEHOLDERS.md) D7。
+上游模板把 `ProjectManager.AskForMigrate` 提交为 `false`，CubeMX 每次生成 / 保存都会改回
+`true`。**本仓当前 `.ioc` 里的实际值是 `true`（2026-11-17 核对），不是 `false`**；无头生成
+前先手工改成 `false`，生成后再核对一次。无头模式如果卡在 `Begin LoadConfig()` 后不再输出，
+先把它改成 `false` 再跑（这是模态迁移框在等人点）。详见 [占位符](PLACEHOLDERS.md) D7。
 
-### 3.5 `syscalls.c` / `sysmem.c` 会被写成叠加路径
+### 3.5 `syscalls.c` / `sysmem.c` **可能**被写成叠加路径
 
-生成日志出现：
+生成日志若出现：
 
 ```text
 FileStreamsReadnWrite: java.io.FileNotFoundException:
   <工程目录>\D:\...\Core\Src\syscalls.c (拒绝访问。)
 ```
 
-这两个文件因此**不会更新**（其余文件正常）。它们是标准 newlib 桩，改动很少；
-要更新就从 `STM32Cube_FW_G4_V1.6.3` 的模板工程里取，或先删除再生成。
+则这两个文件**不会更新**（其余文件正常）。不是每次重生成都会报：上游模板 2026-11-06 的
+一次无头重生成就没有复现（模板记录，本仓未单独复测）。它们是标准 newlib 桩，改动很少；
+要更新就从 `STM32Cube_FW_G4_V1.6.3` 的模板工程里取，或先删除再生成。详见
+[占位符](PLACEHOLDERS.md) D9。
 
 ### 3.6 GPIO 参数要写进 `GPIOParameters` 白名单
 
@@ -131,20 +134,23 @@ PC2.Signal=GPIO_Output
 重新生成后 `main.c` 才会出现对应的 `HAL_GPIO_WritePin(...)`。同理，外设参数要进
 `<IP>.IPParameters`、引脚清单要同步 `Mcu.Pin*` 与 `Mcu.PinsNb`，否则被静默忽略。
 
-> 本仓默认 `.ioc` 已把 **PC2** 配成 `GPIO_Output`（`PC2.GPIOParameters=GPIO_Label`
-> + `PC2.GPIO_Label=LED_R`），对应板载三色灯的红色通道；板载三色灯是 PC0 / PC1 /
-> PC2（见 `Core/Inc/xpulse.h`，共阳低电平点亮）。**PC13 在 X Pulse 板上只引到扩展排针，
-> 没有 LED**，旧的 `LED_RED` / PC13 占位配置已在 D1 中移除。改这类配置属于 L4 变更，
-> 改动后须按 §4 判定清单做生成核验。
+> 本仓 `.ioc` 已把 **PC0 / PC1 / PC2** 配成 `GPIO_Output`，并写
+> `GPIOParameters=PinState,GPIO_Label`、`PinState=GPIO_PIN_SET` 与对应的
+> `GPIO_Label=LED_B/G/R`；重新生成后 `MX_GPIO_Init()` 会写 `GPIO_PIN_SET`。板载三色灯
+> 见 `Core/Inc/xpulse.h`，共阳低电平点亮，初始电平高即熄灭。**PC13 在 X Pulse 板上只
+> 引到扩展排针，没有 LED**，旧的 `LED_RED` / PC13 占位配置已移除。改这类配置属于 L4
+> 变更，改动后须按 §4 判定清单做生成核验。
 
-### 3.7 G474 最小工程也会有一条 `VP_RIF_VS_RIF1` 诊断
+### 3.7 G474 工程也会有一条 `VP_RIF_VS_RIF1` 诊断
 
-即使 `.ioc` 里只有 NVIC / RCC / SYS，生成日志仍可能打印：
+即使 `.ioc` 里只有 NVIC / RCC / SYS，生成日志也可能打印：
 
 ```text
-[INFO] ImportTextPane:234 - (OptionalMessage_ERROR) Pin5 (VP_RIF_VS_RIF1) cannot be retrieved for this MCU
+[INFO] ImportTextPane:234 - (OptionalMessage_ERROR) Pin<N> (VP_RIF_VS_RIF1) cannot be retrieved for this MCU
 ```
 
+- 日志里的 `Pin<N>` 编号随配置浮动：上游模板 2026-11-05 记 `Pin5`、2026-11-06 记
+  `Pin4`，属模板记录；本仓已配 ADC1 / TIM6 / DMA1 等外设，编号也不必相同。**编号不是判据**。
 - 它**不是** `Cannot map signal`，与本工程的引脚配置无关；
 - 加 / 减普通 GPIO 不会让它消失；
 - 判定「配置是否生效」仍以**生成物**为准：日志无 `Cannot map` + `main.c` 里有对应
