@@ -281,6 +281,15 @@ Linux / macOS / Git Bash：
 ./scripts/init-clangd.sh
 ```
 
+也可以用跨平台入口：
+
+```bash
+pnpm run clangd
+pnpm run clangd:disable
+```
+
+`clangd:disable` 会备份并移除 `.vscode/settings.json` 中的 clangd / C_Cpp 配置，删除 `.clangd`，不删除 `compile_commands.json`。
+
 ### 手动执行 — Windows PowerShell
 
 ```powershell

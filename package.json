@@ -5,6 +5,8 @@
   "private": true,
   "description": "2019D 简易电路特性测试仪（软件四 / 软件五）STM32G474VET6 / XPulse 工作区",
   "scripts": {
+    "clangd": "node scripts/clangd.mjs",
+    "clangd:disable": "node scripts/clangd.mjs disable",
     "hooks:install": "vp hooks enable",
     "hooks:uninstall": "vp hooks disable"
   },
