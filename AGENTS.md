@@ -18,7 +18,8 @@
 ## 1. 提交规范（中文 Conventional Commits）
 
 仓库已接入 [commitlint](https://commitlint.js.org/)（规则集
-`@commitlint/config-conventional`，Git `commit-msg` 钩子由 `vpr hooks:install` 转发到
+`@commitlint/config-conventional`，另由本仓库 `commitlint.config.mjs` 追加「简述含汉字」校验
+（只要求至少一个汉字，不限首字），Git `commit-msg` 钩子由 `vpr hooks:install` 转发到
 `.vite-hooks/commit-msg`）。**两者分工互补**：
 
 | 谁 | 管什么 |

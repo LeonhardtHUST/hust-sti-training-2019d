@@ -99,8 +99,8 @@ HAL_GPIO_TogglePin(XPULSE_LED_G_GPIO_Port, XPULSE_LED_G_Pin);
 ## 提交规范（commitlint）
 
 仓库用 [commitlint](https://commitlint.js.org/) 约束提交信息，规范为 **Angular / Conventional
-Commits**（规则集 `@commitlint/config-conventional`）。校验点在 Git 的 `commit-msg` 阶段，
-由 Vite+ 的 Hook 转发器调用仓库内的 `.vite-hooks/commit-msg`，不合规的提交会被直接拒绝。
+Commits**（规则集 `@commitlint/config-conventional`，并要求简述至少含一个汉字）。校验点在 Git 的
+`commit-msg` 阶段，由 Vite+ 的 Hook 转发器调用仓库内的 `.vite-hooks/commit-msg`，不合规的提交会被直接拒绝。
 
 ### 提交信息格式
 
@@ -110,7 +110,7 @@ Commits**（规则集 `@commitlint/config-conventional`）。校验点在 Git �
 
 - `type`：`feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore` `revert`
 - `scope`：可选，本仓库惯用 `core` / `board` / `scripts` / `docs` / `xpulse` / `deps`
-- `subject`：祈使句式、结尾不加句号，中英文均可
+- `subject`：动词开头、至少含一个汉字、不超过 50 字、结尾不加句号或分号；允许 `GPIO` 等英文标识开头
 - 破坏性变更写成 `feat(core)!: ...`，或在 footer 加 `BREAKING CHANGE: ...`
 
 ```text
